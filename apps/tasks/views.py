@@ -4,8 +4,10 @@ from rest_framework.response import Response
 from rest_framework import viewsets,status
 from .models import Tasks
 from .serializers import TasksSerializers
+from rest_framework.permissions import IsAuthenticated
 
 class TasksViewsets(viewsets.ViewSet):
+    permission_classes=[IsAuthenticated]
     def list(self,request):
         qs=Tasks.objects.all()
         serializer=TasksSerializers(qs,many=True)
@@ -20,7 +22,7 @@ class TasksViewsets(viewsets.ViewSet):
     def create(self,request):
         serializer=TasksSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(user=request.user)
         return Response(serializer.data,status=status.HTTP_201_CREATED)
     
     def update(self,request,pk=None):
