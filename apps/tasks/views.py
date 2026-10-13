@@ -5,13 +5,17 @@ from rest_framework import viewsets,status
 from .models import Tasks
 from .serializers import TasksSerializers
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 
 class TasksViewsets(viewsets.ViewSet):
     permission_classes=[IsAuthenticated]
     def list(self,request):
         qs=Tasks.objects.all()
-        serializer=TasksSerializers(qs,many=True)
-        return Response(serializer.data)
+        paginator=PageNumberPagination()
+        paginator.page_size=2
+        paginated_qs=paginator.paginate_queryset(qs,request)
+        serializer=TasksSerializers(paginated_qs,many=True)
+        return paginator.get_paginated_response(serializer.data)
     
     def retrieve(self,request,pk=None):
         qs=Tasks.objects.all()
